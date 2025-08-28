@@ -1,1 +1,7 @@
+## 📂 Dataset
+This project uses the [CDC Indicators of Heart Disease dataset](https://www.kaggle.com/datasets/kamilpytlak/personal-key-indicators-of-heart-disease).  
 
+To run locally:
+1. Download the dataset CSV from the link above
+2. Save it as `heart.csv` in the project folder
+3. Run `python main.py`
