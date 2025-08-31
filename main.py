@@ -1,4 +1,3 @@
-# ---- Heart Disease ML (clean, portfolio-ready) ----
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,26 +16,19 @@ pd.set_option("max_colwidth", None)
 
 CSV_PATH = "heartDisease_2020_sampling.csv"   # <-- make sure this filename matches your CSV
 
-# ----------------------------
-# 1) Load
-# ----------------------------
+# Load
 df = pd.read_csv(CSV_PATH)
 print("Dataset loaded:", df.shape)
 print("\nSample:\n", df.head())
 
-# ----------------------------
-# 2) Target -> numeric (0/1)
-# ----------------------------
-# Many versions have "Yes"/"No" for HeartDisease
+
 if df["HeartDisease"].dtype == object:
     df["HeartDisease"] = df["HeartDisease"].map({"No": 0, "Yes": 1}).astype("Int64")
 else:
     # If it's already numeric as strings, coerce to int
     df["HeartDisease"] = pd.to_numeric(df["HeartDisease"], errors="coerce").astype("Int64")
 
-# ----------------------------
-# 3) Basic cleaning & encoding
-# ----------------------------
+
 # Fill missing values BEFORE one-hot
 cat_cols = [c for c in df.columns if df[c].dtype == "object" and c != "HeartDisease"]
 num_cols = [c for c in df.columns if c not in cat_cols + ["HeartDisease"]]
@@ -54,9 +46,8 @@ df = pd.get_dummies(df, columns=cat_cols, drop_first=True)
 print("\nAfter encoding:", df.shape)
 print(df.head())
 
-# ----------------------------
-# 4) Train/Test split
-# ----------------------------
+
+# Train/Test split
 X = df.drop("HeartDisease", axis=1)
 y = df["HeartDisease"].astype(int)
 
@@ -64,9 +55,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# ----------------------------
-# 5) Models (balanced for class imbalance)
-# ----------------------------
+# Models 
 tree = DecisionTreeClassifier(
     random_state=42,
     max_depth=5,
@@ -83,9 +72,9 @@ tree.fit(X_train, y_train)
 rf.fit(X_train, y_train)
 print("\nModels trained ✓")
 
-# ----------------------------
-# 6) Evaluation helper
-# ----------------------------
+
+#  Evaluation helper
+
 def eval_model(name, model, Xte, yte):
     y_pred = model.predict(Xte)
     acc = accuracy_score(yte, y_pred)
@@ -104,7 +93,7 @@ y_pred_tree, cm_tree, acc_t, prec_t, rec_t, f1_t = eval_model("Decision Tree", t
 y_pred_rf,   cm_rf,   acc_r, prec_r, rec_r, f1_r = eval_model("Random Forest", rf, X_test, y_test)
 
 # ----------------------------
-# 7) Confusion matrices (save + show both)
+#Confusion matrices
 # ----------------------------
 fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 ConfusionMatrixDisplay(cm_tree, display_labels=["No Disease", "Disease"]).plot(
@@ -130,15 +119,11 @@ plt.show()
 
 print("\nSaved figures: confusion_matrices.png and confusion_matrix_rf.png")
 
-# ----------------------------
-# 8) Tree rules (explainability)
-# ----------------------------
+#Tree rules (explainability)
 print("\nDecision Tree Rules (truncated):\n")
 print(export_text(tree, feature_names=list(X.columns))[:2000])  # print first ~2000 chars
+# Comparison table
 
-# ----------------------------
-# 9) Comparison table
-# ----------------------------
 results = pd.DataFrame({
     "Model": ["Decision Tree", "Random Forest"],
     "Accuracy": [acc_t, acc_r],
@@ -148,7 +133,6 @@ results = pd.DataFrame({
 })
 print("\nModel Comparison:\n", results.round(3))
 
-# Optional: top features from Random Forest
 importances = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)[:10]
 print("\nTop 10 Features (Random Forest):\n", importances.round(4))
 
